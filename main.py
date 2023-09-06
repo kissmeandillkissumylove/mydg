@@ -54,5 +54,10 @@ while running: #main loop
    #SCREEN UPDATE
    screen.fill((200, 200, 200)) #fill screen for updating
    screen.blit(player_img, (player_rect.x, player_rect.y)) #draw char
+   pygame.draw.rect(screen, (0, 0, 0), top_wall) #draw walls
+   pygame.draw.rect(screen, (0, 0, 0), bottom_wall)
+   pygame.draw.rect(screen, (0, 0, 0), left_wall)
+   pygame.draw.rect(screen, (0, 0, 0), right_wall)
+   #LAST UPDATE
    pygame.display.update() #display update
    pygame.time.Clock().tick(60) #60fps
