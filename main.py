@@ -1,4 +1,7 @@
 import pygame #import pygame
+import random #import random
+
+
 pygame.init() #pygame init
 
 
@@ -15,6 +18,14 @@ player_rect.x = 20
 player_rect.y = 20
 player_speed = 2
 
+
+#ENEMY SETTINGS
+enemy_img = pygame.image.load('dgfiles/enemy.png')
+enemy_rect = enemy_img.get_rect()
+enemy_rect.x = random.randint(100, SCREEN_WIDTH-25)
+enemy_rect.y = random.randint(100, SCREEN_HEIGHT-25)
+enemy_speed = 2
+enemy_direction = 'right'
 
 
 #SCREEN BARIERS
@@ -51,13 +62,26 @@ while running: #main loop
          player_rect.x -= player_speed  #undo move
 
 
+   #ENEMY MOOVING
+   if enemy_direction == 'right':
+      enemy_rect.x += enemy_speed
+   elif enemy_direction == 'left':
+      enemy_rect.x -= enemy_speed
+
+   if enemy_rect.x >= SCREEN_WIDTH - 32:
+      enemy_direction = 'left'
+   elif enemy_rect.x <= 5:
+      enemy_direction = 'right'
+
+
    #SCREEN UPDATE
    screen.fill((200, 200, 200)) #fill screen for updating
+   pygame.draw.rect(screen, (255, 0, 0), top_wall)  # draw walls
+   pygame.draw.rect(screen, (255, 0, 0), bottom_wall)
+   pygame.draw.rect(screen, (255, 0, 0), left_wall)
+   pygame.draw.rect(screen, (255, 0, 0), right_wall)
    screen.blit(player_img, (player_rect.x, player_rect.y)) #draw char
-   pygame.draw.rect(screen, (0, 0, 0), top_wall) #draw walls
-   pygame.draw.rect(screen, (0, 0, 0), bottom_wall)
-   pygame.draw.rect(screen, (0, 0, 0), left_wall)
-   pygame.draw.rect(screen, (0, 0, 0), right_wall)
+   screen.blit(enemy_img, (enemy_rect.x, enemy_rect.y))
    #LAST UPDATE
    pygame.display.update() #display update
    pygame.time.Clock().tick(60) #60fps
