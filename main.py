@@ -57,7 +57,7 @@ while running: #main loop
    dist_x = player_rect.x - enemy_rect.x
    dist_y = player_rect.y - enemy_rect.y
    distance = math.hypot(dist_x, dist_y)
-   if distance < 100:
+   if distance < 150:
       try:
          move_dir_x = dist_x / distance #chase player
          move_dir_y = dist_y / distance
