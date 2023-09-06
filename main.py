@@ -1,5 +1,6 @@
 import pygame #import pygame
 import random #import random
+import math #improve our math
 
 
 pygame.init() #pygame init
@@ -22,8 +23,8 @@ player_speed = 2
 #ENEMY SETTINGS
 enemy_img = pygame.image.load('dgfiles/enemy.png')
 enemy_rect = enemy_img.get_rect()
-enemy_rect.x = random.randint(100, SCREEN_WIDTH-25)
-enemy_rect.y = random.randint(100, SCREEN_HEIGHT-25)
+enemy_rect.x = random.randint(230, SCREEN_WIDTH-25)
+enemy_rect.y = random.randint(230, SCREEN_HEIGHT-25)
 enemy_speed = 2
 enemy_direction = 'right'
 
@@ -35,9 +36,37 @@ left_wall = pygame.Rect(0, 0, 5, SCREEN_HEIGHT)
 right_wall = pygame.Rect(SCREEN_WIDTH-5, 0, 5, SCREEN_HEIGHT)
 
 
+def enemy_mooving(): #enemy mooving logic
+   global enemy_direction
+   if enemy_direction == 'right':
+      enemy_rect.x += enemy_speed
+   elif enemy_direction == 'left':
+      enemy_rect.x -= enemy_speed
+   if enemy_rect.x >= SCREEN_WIDTH - 21:
+      enemy_direction = 'left'
+   elif enemy_rect.x <= 5:
+      enemy_direction = 'right'
+
+
 #MAIN LOOP
 running = True #flag for game is running
 while running: #main loop
+
+
+   #ENEMY VISION
+   dist_x = player_rect.x - enemy_rect.x
+   dist_y = player_rect.y - enemy_rect.y
+   distance = math.hypot(dist_x, dist_y)
+   if distance < 100:
+      try:
+         move_dir_x = dist_x / distance #chase player
+         move_dir_y = dist_y / distance
+         enemy_rect.x += move_dir_x * enemy_speed
+         enemy_rect.y += move_dir_y * enemy_speed
+      except ZeroDivisionError:
+         pass
+   else:
+      enemy_mooving()
 
 
    #KEYBOARD
@@ -60,18 +89,6 @@ while running: #main loop
       player_rect.x += player_speed
       if player_rect.colliderect(right_wall):
          player_rect.x -= player_speed  #undo move
-
-
-   #ENEMY MOOVING
-   if enemy_direction == 'right':
-      enemy_rect.x += enemy_speed
-   elif enemy_direction == 'left':
-      enemy_rect.x -= enemy_speed
-
-   if enemy_rect.x >= SCREEN_WIDTH - 32:
-      enemy_direction = 'left'
-   elif enemy_rect.x <= 5:
-      enemy_direction = 'right'
 
 
    #SCREEN UPDATE
