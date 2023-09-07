@@ -1,104 +1,176 @@
-import pygame #import pygame
-import random #import random
-import math #improve our math
+import pygame     #import pygame
+import random     #import random
+import math        #improve our math
 
 
-pygame.init() #pygame init
+
+floor1sprite = "dgfiles/floor1.png" #sprite for dg floor
 
 
-#WINDOW SETTINGS
-SCREEN_WIDTH = 500
-SCREEN_HEIGHT = 500
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT)) #screen size
+
+class Keyboard:
+	'''keyboard class'''
+
+	def __new__(cls, *args, **kwargs):
+		'''set __new__ method'''
+
+		print("call __new__ for object Keyboard")
+		return super().__new__(cls) #return class link
 
 
-#CHARACTER SETTINGS
-player_img = pygame.image.load('dgfiles/player.png') #image for character
-player_rect = player_img.get_rect() #get player rect
-player_rect.x = 20
-player_rect.y = 20
-player_speed = 2
+	def __init__(self):
+		'''set __init__ method'''
+
+		print("call __init__ for object Keyboard")
 
 
-#ENEMY SETTINGS
-enemy_img = pygame.image.load('dgfiles/enemy.png')
-enemy_rect = enemy_img.get_rect()
-enemy_rect.x = random.randint(230, SCREEN_WIDTH-25)
-enemy_rect.y = random.randint(230, SCREEN_HEIGHT-25)
-enemy_speed = 2
-enemy_direction = 'right'
+	def __del__(self):
+		'''set __del__ method'''
+
+		print("call __del__ for object Keyboard")
 
 
-#SCREEN BARIERS
-top_wall = pygame.Rect(0, 0, SCREEN_WIDTH, 5)
-bottom_wall = pygame.Rect(0, SCREEN_HEIGHT-5, SCREEN_WIDTH, 5)
-left_wall = pygame.Rect(0, 0, 5, SCREEN_HEIGHT)
-right_wall = pygame.Rect(SCREEN_WIDTH-5, 0, 5, SCREEN_HEIGHT)
+	def check_keyboard(self):
+		'''check keyboard events'''
+
+		for event in pygame.event.get(): #player wanna leave game
+			if event.type == pygame.QUIT:
+				game.running = False
 
 
-def enemy_mooving(): #enemy mooving logic
-   global enemy_direction
-   if enemy_direction == 'right':
-      enemy_rect.x += enemy_speed
-   elif enemy_direction == 'left':
-      enemy_rect.x -= enemy_speed
-   if enemy_rect.x >= SCREEN_WIDTH - 21:
-      enemy_direction = 'left'
-   elif enemy_rect.x <= 5:
-      enemy_direction = 'right'
+
+class Floor:
+	'''class which drawing dungeon floor'''
+
+	def __new__(cls, *args, **kwargs):
+		'''set __new__ method'''
+
+		print("call __new__ for object Floor")
+		return super().__new__(cls) #return class link
 
 
-#MAIN LOOP
-running = True #flag for game is running
-while running: #main loop
+	def __init__(self):
+		'''set __init__ method'''
+
+		print("call __init__ for object Floor")
+		self.floor1 = pygame.image.load(floor1sprite) #load image for tileble floor
+		self.floor1_size = 100 #image size (should be AxA)
+		#number of columns to fill with sprites
+		self.columns = (Screen.get_screen_width()) // self.floor1_size
+		#number of rows to fill with sprites
+		self.rows = (Screen.get_screen_height()) // self.floor1_size
 
 
-   #ENEMY VISION
-   dist_x = player_rect.x - enemy_rect.x
-   dist_y = player_rect.y - enemy_rect.y
-   distance = math.hypot(dist_x, dist_y)
-   if distance < 150:
-      try:
-         move_dir_x = dist_x / distance #chase player
-         move_dir_y = dist_y / distance
-         enemy_rect.x += move_dir_x * enemy_speed
-         enemy_rect.y += move_dir_y * enemy_speed
-      except ZeroDivisionError:
-         pass
-   else:
-      enemy_mooving()
+	def __del__(self):
+		'''set __del__ method'''
+
+		print("call __del__ for object Floor")
 
 
-   #KEYBOARD
-   for event in pygame.event.get():
-      if event.type == pygame.QUIT:
-         running = False
-   if pygame.key.get_pressed()[pygame.K_UP]: #move character up
-      player_rect.y -= player_speed
-      if player_rect.colliderect(top_wall):
-         player_rect.y += player_speed  #undo move
-   if pygame.key.get_pressed()[pygame.K_DOWN]: #move character down
-      player_rect.y += player_speed
-      if player_rect.colliderect(bottom_wall):
-         player_rect.y -= player_speed  #undo move
-   if pygame.key.get_pressed()[pygame.K_LEFT]: #move character left
-      player_rect.x -= player_speed
-      if player_rect.colliderect(left_wall):
-         player_rect.x += player_speed  #undo move
-   if pygame.key.get_pressed()[pygame.K_RIGHT]: #move character right
-      player_rect.x += player_speed
-      if player_rect.colliderect(right_wall):
-         player_rect.x -= player_speed  #undo move
+	def draw_floor(self, surface):
+		'''method for render floor'''
+
+		for row in range(self.rows):
+			for column in range(self.columns):
+				surface.blit(self.floor1, (column*self.floor1_size + 4, row*self.floor1_size + 4))
 
 
-   #SCREEN UPDATE
-   screen.fill((200, 200, 200)) #fill screen for updating
-   pygame.draw.rect(screen, (255, 0, 0), top_wall)  # draw walls
-   pygame.draw.rect(screen, (255, 0, 0), bottom_wall)
-   pygame.draw.rect(screen, (255, 0, 0), left_wall)
-   pygame.draw.rect(screen, (255, 0, 0), right_wall)
-   screen.blit(player_img, (player_rect.x, player_rect.y)) #draw char
-   screen.blit(enemy_img, (enemy_rect.x, enemy_rect.y))
-   #LAST UPDATE
-   pygame.display.update() #display update
-   pygame.time.Clock().tick(60) #60fps
+
+class Screen:
+	'''class for render main screen'''
+
+	width = 608 # init main screen size
+	height = 608
+
+	def __new__(cls, *args, **kwargs):
+		'''set __new__ method'''
+
+		print("call __new__ for object Screen")
+		return super().__new__(cls)  #return class link
+
+
+	def __init__(self):
+		'''set __init__ method'''
+
+		print("call __init__ for object Screen")
+		#make screen
+		self.game_screen = pygame.display.set_mode((self.width, self.height))
+
+
+	def __del__(self):
+		'''set __del__ method'''
+
+		print("call __del__ for object Screen")
+
+
+	@classmethod
+	def get_screen_width(cls):
+		#get width of current main screen
+
+		return cls.width
+
+
+	@classmethod
+	def get_screen_height(cls):
+		#get width of current main screen
+
+		return cls.height
+
+
+	def get_screen(self):
+		#get screen surface
+
+		return self.game_screen
+
+
+
+class Game:
+	'''object which include game settings'''
+
+	def __new__(cls, *args, **kwargs):
+		'''set __new__ method'''
+
+		print("call __new__ for object Game")
+		return super().__new__(cls) #return class link
+
+
+	def __init__(self):
+		'''set __init__ method'''
+
+		print("call __init__ for object Game")
+		pygame.init() #init pygame
+		self.running = True #flag for main loop
+
+
+	def __del__(self):
+		'''set __del__ method'''
+
+		print("call __del__ for object Game")
+		pygame.quit()
+
+
+	def game_loop(self):
+		#main loop
+
+		object_screen = Screen()
+		object_floor = Floor()
+		object_keyboard = Keyboard()
+
+		while self.running:
+			object_keyboard.check_keyboard()
+
+			self.render_objects(object_floor, object_screen, object_keyboard)
+
+			pygame.display.update() #update display
+			pygame.time.Clock().tick(60) #set 60 fps
+
+
+	def render_objects(self, object_floor, object_screen, object_keyboard):
+		#function for rendering all sprites
+
+		object_floor.draw_floor(object_screen.game_screen)
+
+
+
+game = Game()
+game.game_loop()
