@@ -4,7 +4,11 @@ import math        #improve our math
 
 
 
+#sprites paths
 floor1sprite = "dgfiles/floor1.png" #sprite for dg floor
+#colors
+almost_black = (30, 30, 30)
+
 
 
 
@@ -134,23 +138,26 @@ class Game:
 
 	def game_loop(self):
 		#main loop
-		object_screen = Screen()
-		object_floor = Floor()
-		object_keyboard = Keyboard()
+		obj_screen = Screen()
+		obj_floor = Floor()
+		obj_keyboard = Keyboard()
+		obj_wall = Wall()
 
 		while self.running:
 			#keyboard
-			object_keyboard.check_keyboard()
+			obj_keyboard.check_keyboard()
 			#rendering
-			self.render_objects(object_floor, object_screen, object_keyboard)
+			self.render_objects(obj_floor, obj_screen, obj_keyboard, obj_wall)
 			#display update and fps
 			pygame.display.update() #update display
 			pygame.time.Clock().tick(60) #set 60 fps
 
 
-	def render_objects(self, object_floor, object_screen, object_keyboard):
+	def render_objects(self, obj_floor, obj_screen, obj_keyboard, obj_wall):
 		#function for rendering all sprites
-		object_floor.draw_floor(object_screen.game_screen)
+		obj_floor.draw_floor(obj_screen.game_screen)
+		obj_wall.draw_bariers(obj_screen.game_screen)
+
 
 
 
@@ -166,11 +173,25 @@ class Wall:
 	def __init__(self):
 		'''set __init__ method'''
 		print("call __init__ for object Wall")
+		self.top_barier = pygame.Rect(0, 0, Screen.get_screen_width(), 4)
+		self.bot_barier = pygame.Rect(0, Screen.get_screen_height()-4,
+		                                        Screen.get_screen_width(), 4)
+		self.left_barier = pygame.Rect(0, 0, 4, Screen.get_screen_height())
+		self.right_barier = pygame.Rect(Screen.get_screen_width()-4, 0,
+		                                        4, Screen.get_screen_height())
 
 
 	def __del__(self):
 		'''set __del__ method'''
 		print("call __del__ for object Wall")
+
+
+	def draw_bariers(self, surface):
+		'''draw all screen borders'''
+		pygame.draw.rect(surface, almost_black, self.top_barier)
+		pygame.draw.rect(surface, almost_black, self.bot_barier)
+		pygame.draw.rect(surface, almost_black, self.left_barier)
+		pygame.draw.rect(surface, almost_black, self.right_barier)
 
 
 
