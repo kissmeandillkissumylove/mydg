@@ -7,6 +7,9 @@ import math        #improve our math
 #sprites paths
 floor1_sprite = "dgfiles/floor1.png" #sprite for dg floor
 hero_afk_front_sprite = 'dgfiles/hero_stay_front.png' #sprite for hero afk front
+hero_afk_back_sprite = 'dgfiles/hero_stay_back.png' #sprite for hero afk back
+hero_afk_left_sprite = 'dgfiles/hero_stay_left.png' #sprite for hero afk left
+hero_afk_right_sprite = 'dgfiles/hero_stay_right.png' #sprite for hero afk right
 #colors
 almost_black = (30, 30, 30)
 
@@ -40,21 +43,25 @@ class Keyboard:
 
 		if pygame.key.get_pressed()[pygame.K_UP]: #move hero up
 			obj_hero.hero_rect.y -= obj_hero.hero_speed
+			obj_hero.hero_curr_img = obj_hero.hero_back_img
 			if obj_hero.hero_rect.colliderect(obj_wall.top_barier):
 					obj_hero.hero_rect.y += obj_hero.hero_speed #undo move
 
 		if pygame.key.get_pressed()[pygame.K_DOWN]:  #move hero down
 			obj_hero.hero_rect.y += obj_hero.hero_speed
+			obj_hero.hero_curr_img = obj_hero.hero_front_img
 			if obj_hero.hero_rect.colliderect(obj_wall.bot_barier):
 				obj_hero.hero_rect.y -= obj_hero.hero_speed  #undo move
 
 		if pygame.key.get_pressed()[pygame.K_LEFT]:  #move hero left
 			obj_hero.hero_rect.x -= obj_hero.hero_speed
+			obj_hero.hero_curr_img = obj_hero.hero_left_img
 			if obj_hero.hero_rect.colliderect(obj_wall.left_barier):
 				obj_hero.hero_rect.x += obj_hero.hero_speed  #undo move
 
 		if pygame.key.get_pressed()[pygame.K_RIGHT]:  #move hero right
 			obj_hero.hero_rect.x += obj_hero.hero_speed
+			obj_hero.hero_curr_img = obj_hero.hero_right_img
 			if obj_hero.hero_rect.colliderect(obj_wall.right_barier):
 				obj_hero.hero_rect.x -= obj_hero.hero_speed  #undo move
 
@@ -229,8 +236,13 @@ class Hero:
 	def __init__(self):
 		'''set __init__ method'''
 		print("call __init__ for object Hero")
-		self.hero_img = pygame.image.load(hero_afk_front_sprite)  #load image for hero
-		self.hero_rect = self.hero_img.get_rect() #get player rect
+		#load image for hero
+		self.hero_front_img = pygame.image.load(hero_afk_front_sprite)
+		self.hero_back_img = pygame.image.load(hero_afk_back_sprite)
+		self.hero_left_img = pygame.image.load(hero_afk_left_sprite)
+		self.hero_right_img = pygame.image.load(hero_afk_right_sprite)
+		self.hero_curr_img = self.hero_front_img
+		self.hero_rect = self.hero_curr_img.get_rect() #get player rect
 		self.hero_rect.x = 5 #set player start position
 		self.hero_rect.y = 5
 		self.hero_speed = 4 #hero movement speed
@@ -243,7 +255,27 @@ class Hero:
 
 	def draw_hero(self, surface):
 		'''function for drawing player'''
-		surface.blit(self.hero_img, (self.hero_rect.x, self.hero_rect.y))
+		surface.blit(self.hero_curr_img, (self.hero_rect.x, self.hero_rect.y))
+
+
+
+class Enemy:
+	'''enemy class'''
+
+	def __new__(cls, *args, **kwargs):
+		'''set __new__ method'''
+		print("call __new__ for object Enemy")
+		return super().__new__(cls)  #return class link
+
+
+	def __init__(self):
+		'''set __init__ method'''
+		print("call __init__ for object Enemy")
+
+
+	def __del__(self):
+		'''set __del__ method'''
+		print("call __del__ for object Enemy")
 
 
 
