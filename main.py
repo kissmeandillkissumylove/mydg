@@ -178,9 +178,10 @@ class Game:
 		while self.running:
 			#keyboard
 			obj_keyboard.check_keyboard(obj_hero, obj_wall)
-			obj_skeleton.skeleton_mooving(obj_wall, obj_hero)
+
 			#rendering
 			self.render_objects(obj_floor, obj_screen, obj_wall, obj_hero, obj_skeleton)
+			obj_skeleton.skeleton_mooving(obj_wall, obj_hero, obj_screen.game_screen)
 			#display update and fps
 			pygame.display.update() #update display
 			pygame.time.Clock().tick(60) #set 60 fps
@@ -283,6 +284,7 @@ class Skeleton:
 		self.skeleton_rect.y = random.randint(230, Screen.get_screen_height()-50)
 		self.skeleton_speed = 3
 		self.skeleton_direction = 'right'
+		self.remember_hero_x = self.remember_hero_y = 'idk'
 
 
 	def __del__(self):
@@ -290,7 +292,7 @@ class Skeleton:
 		print("call __del__ for object Skeleton")
 
 
-	def skeleton_mooving(self, obj_wall, obj_hero):
+	def skeleton_mooving(self, obj_wall, obj_hero, surface):
 		'''enemy mooving logic'''
 		if self.skeleton_direction == 'right':
 			self.skeleton_rect.x += self.skeleton_speed
@@ -315,19 +317,26 @@ class Skeleton:
 		distance_x = obj_hero.hero_rect.x - self.skeleton_rect.x
 		distance_y = obj_hero.hero_rect.y - self.skeleton_rect.y
 		distance = math.hypot(distance_x, distance_y)
-		if distance < 150:
-			try:
-				move_dir_x = distance_x / distance #chase player
-				move_dir_y = distance_y / distance
-				print(move_dir_x)
-				print(move_dir_y)
-				print(distance_x)
-				print(distance_y)
-				self.skeleton_rect.x += move_dir_x * self.skeleton_speed
-				self.skeleton_rect.y += move_dir_y * self.skeleton_speed
-				print(self.skeleton_rect.x, self.skeleton_rect.y)
-			except ZeroDivisionError:
-				pass
+		if distance < 150 and distance != 0:
+			self.skeleton_direction = 'chasing'
+			move_dir_x = distance_x / distance
+			move_dir_y = distance_y / distance
+			self.skeleton_rect.x += move_dir_x * self.skeleton_speed
+			self.skeleton_rect.y += move_dir_y * self.skeleton_speed
+			self.remember_hero_x = obj_hero.hero_rect.x
+			self.remember_hero_y = obj_hero.hero_rect.x
+		elif distance == 0:
+			move_dir_x = 0
+			move_dir_y = 1
+		else:
+			if self.remember_hero_x != 'idk' and self.remember_hero_y != 'idk':
+				distance_x = self.remember_hero_x - self.skeleton_rect.x
+				if distance_x > 0:
+					self.skeleton_direction = 'right'
+					self.remember_hero_y = self.remember_hero_x = 'idk'
+				else:
+					self.skeleton_direction = 'left'
+					self.remember_hero_y = self.remember_hero_x = 'idk'
 
 
 
