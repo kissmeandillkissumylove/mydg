@@ -10,6 +10,8 @@ hero_afk_front_sprite = 'dgfiles/hero_stay_front.png' #sprite for hero afk front
 hero_afk_back_sprite = 'dgfiles/hero_stay_back.png' #sprite for hero afk back
 hero_afk_left_sprite = 'dgfiles/hero_stay_left.png' #sprite for hero afk left
 hero_afk_right_sprite = 'dgfiles/hero_stay_right.png' #sprite for hero afk right
+skeleton_afk_front_sprite = 'dgfiles/skeleton_stay_front.png' #sprite for skeleton afk front
+
 #colors
 almost_black = (30, 30, 30)
 
@@ -171,22 +173,25 @@ class Game:
 		obj_keyboard = Keyboard()
 		obj_wall = Wall()
 		obj_hero = Hero()
+		obj_skeleton = Skeleton()
 
 		while self.running:
 			#keyboard
 			obj_keyboard.check_keyboard(obj_hero, obj_wall)
+			obj_skeleton.skeleton_mooving(obj_wall, obj_hero)
 			#rendering
-			self.render_objects(obj_floor, obj_screen, obj_wall, obj_hero)
+			self.render_objects(obj_floor, obj_screen, obj_wall, obj_hero, obj_skeleton)
 			#display update and fps
 			pygame.display.update() #update display
 			pygame.time.Clock().tick(60) #set 60 fps
 
 
-	def render_objects(self, obj_floor, obj_screen, obj_wall, obj_hero):
+	def render_objects(self, obj_floor, obj_screen, obj_wall, obj_hero, obj_skeleton):
 		#function for rendering all sprites
 		obj_floor.draw_floor(obj_screen.game_screen)
 		obj_wall.draw_bariers(obj_screen.game_screen)
 		obj_hero.draw_hero(obj_screen.game_screen)
+		obj_skeleton.draw_skeleton(obj_screen.game_screen)
 
 
 
@@ -259,23 +264,70 @@ class Hero:
 
 
 
-class Enemy:
+class Skeleton:
 	'''enemy class'''
 
 	def __new__(cls, *args, **kwargs):
 		'''set __new__ method'''
-		print("call __new__ for object Enemy")
+		print("call __new__ for object Skeleton")
 		return super().__new__(cls)  #return class link
 
 
 	def __init__(self):
 		'''set __init__ method'''
-		print("call __init__ for object Enemy")
+		print("call __init__ for object Skeleton")
+		self.skeleton_img = pygame.image.load(skeleton_afk_front_sprite) #load img
+		self.skeleton_curr_img = self.skeleton_img #current skeleton img
+		self.skeleton_rect = self.skeleton_img.get_rect() #skeleton rect
+		self.skeleton_rect.x = random.randint(230, Screen.get_screen_width()-40)
+		self.skeleton_rect.y = random.randint(230, Screen.get_screen_height()-50)
+		self.skeleton_speed = 3
+		self.skeleton_direction = 'right'
 
 
 	def __del__(self):
 		'''set __del__ method'''
-		print("call __del__ for object Enemy")
+		print("call __del__ for object Skeleton")
+
+
+	def skeleton_mooving(self, obj_wall, obj_hero):
+		'''enemy mooving logic'''
+		if self.skeleton_direction == 'right':
+			self.skeleton_rect.x += self.skeleton_speed
+			if self.skeleton_rect.colliderect(obj_wall.right_barier):
+				self.skeleton_direction = 'left'
+
+		elif self.skeleton_direction == 'left':
+			self.skeleton_rect.x -= self.skeleton_speed
+			if self.skeleton_rect.colliderect(obj_wall.left_barier):
+				self.skeleton_direction = 'right'
+
+		self.skeleton_vision(obj_hero)
+
+
+	def draw_skeleton(self, surface):
+		'''blit skeleton'''
+		surface.blit(self.skeleton_curr_img, (self.skeleton_rect.x, self.skeleton_rect.y))
+
+
+	def skeleton_vision(self, obj_hero):
+		'''eyes of skeleton'''
+		distance_x = obj_hero.hero_rect.x - self.skeleton_rect.x
+		distance_y = obj_hero.hero_rect.y - self.skeleton_rect.y
+		distance = math.hypot(distance_x, distance_y)
+		if distance < 150:
+			try:
+				move_dir_x = distance_x / distance #chase player
+				move_dir_y = distance_y / distance
+				print(move_dir_x)
+				print(move_dir_y)
+				print(distance_x)
+				print(distance_y)
+				self.skeleton_rect.x += move_dir_x * self.skeleton_speed
+				self.skeleton_rect.y += move_dir_y * self.skeleton_speed
+				print(self.skeleton_rect.x, self.skeleton_rect.y)
+			except ZeroDivisionError:
+				pass
 
 
 
