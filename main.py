@@ -11,6 +11,8 @@ hero_afk_back_sprite = 'dgfiles/hero_stay_back.png' #sprite for hero afk back
 hero_afk_left_sprite = 'dgfiles/hero_stay_left.png' #sprite for hero afk left
 hero_afk_right_sprite = 'dgfiles/hero_stay_right.png' #sprite for hero afk right
 skeleton_afk_front_sprite = 'dgfiles/skeleton_stay_front.png' #sprite for skeleton afk front
+skeleton_afk_left_sprite = 'dgfiles/skeleton_stay_left.png' #sprite for skeleton afk front
+skeleton_afk_right_sprite = 'dgfiles/skeleton_stay_right.png' #sprite for skeleton afk front
 
 #colors
 almost_black = (30, 30, 30)
@@ -173,7 +175,7 @@ class Game:
 		obj_keyboard = Keyboard()
 		obj_wall = Wall()
 		obj_hero = Hero()
-		obj_skeleton = Skeleton()
+		obj_skeleton = [Skeleton() for elt in range(0, 10)]
 
 		while self.running:
 			#keyboard
@@ -181,7 +183,9 @@ class Game:
 
 			#rendering
 			self.render_objects(obj_floor, obj_screen, obj_wall, obj_hero, obj_skeleton)
-			obj_skeleton.skeleton_mooving(obj_wall, obj_hero, obj_screen.game_screen)
+			for elt in range(0, 10):
+				obj_skeleton[elt].skeleton_mooving(obj_wall, obj_hero,
+				                                   obj_screen.game_screen)
 			#display update and fps
 			pygame.display.update() #update display
 			pygame.time.Clock().tick(60) #set 60 fps
@@ -192,7 +196,8 @@ class Game:
 		obj_floor.draw_floor(obj_screen.game_screen)
 		obj_wall.draw_bariers(obj_screen.game_screen)
 		obj_hero.draw_hero(obj_screen.game_screen)
-		obj_skeleton.draw_skeleton(obj_screen.game_screen)
+		for elt in range(0, 10):
+			obj_skeleton[elt].draw_skeleton(obj_screen.game_screen)
 
 
 
@@ -277,14 +282,17 @@ class Skeleton:
 	def __init__(self):
 		'''set __init__ method'''
 		print("call __init__ for object Skeleton")
-		self.skeleton_img = pygame.image.load(skeleton_afk_front_sprite) #load img
-		self.skeleton_curr_img = self.skeleton_img #current skeleton img
-		self.skeleton_rect = self.skeleton_img.get_rect() #skeleton rect
+		self.skeleton_stay_front = pygame.image.load(skeleton_afk_front_sprite) #load img
+		self.skeleton_stay_left = pygame.image.load(skeleton_afk_left_sprite)
+		self.skeleton_stay_right = pygame.image.load(skeleton_afk_right_sprite)
+		self.skeleton_curr_img = self.skeleton_stay_front #current skeleton img
+		self.skeleton_rect = self.skeleton_stay_front.get_rect() #skeleton rect
 		self.skeleton_rect.x = random.randint(230, Screen.get_screen_width()-40)
 		self.skeleton_rect.y = random.randint(230, Screen.get_screen_height()-50)
 		self.skeleton_speed = 3
-		self.skeleton_direction = 'right'
+		self.skeleton_direction = random.choice(['right', 'left'])
 		self.remember_hero_x = self.remember_hero_y = 'idk'
+		self.chase_cooldown = 0
 
 
 	def __del__(self):
@@ -294,12 +302,21 @@ class Skeleton:
 
 	def skeleton_mooving(self, obj_wall, obj_hero, surface):
 		'''enemy mooving logic'''
+		if self.chase_cooldown > 0:
+			self.chase_cooldown -= 1
+			distance = self.calculate_distance_to_hero(obj_hero)
+			if distance[0] < 150:
+				return self.skeleton_vision(obj_hero)
+			return
+
 		if self.skeleton_direction == 'right':
+			self.skeleton_curr_img = self.skeleton_stay_right
 			self.skeleton_rect.x += self.skeleton_speed
 			if self.skeleton_rect.colliderect(obj_wall.right_barier):
 				self.skeleton_direction = 'left'
 
 		elif self.skeleton_direction == 'left':
+			self.skeleton_curr_img = self.skeleton_stay_left
 			self.skeleton_rect.x -= self.skeleton_speed
 			if self.skeleton_rect.colliderect(obj_wall.left_barier):
 				self.skeleton_direction = 'right'
@@ -314,22 +331,27 @@ class Skeleton:
 
 	def skeleton_vision(self, obj_hero):
 		'''eyes of skeleton'''
-		distance_x = obj_hero.hero_rect.x - self.skeleton_rect.x
-		distance_y = obj_hero.hero_rect.y - self.skeleton_rect.y
-		distance = math.hypot(distance_x, distance_y)
-		if distance < 150 and distance != 0:
+		distance = self.calculate_distance_to_hero(obj_hero)
+		if distance[0] < 150 and distance[0] != 0:
 			self.skeleton_direction = 'chasing'
-			move_dir_x = distance_x / distance
-			move_dir_y = distance_y / distance
+			move_dir_x = distance[1] / distance[0]
+			move_dir_y = distance[2] / distance[0]
+			if move_dir_x > 0:
+				self.skeleton_curr_img = self.skeleton_stay_right
+			else:
+				self.skeleton_curr_img = self.skeleton_stay_left
 			self.skeleton_rect.x += move_dir_x * self.skeleton_speed
 			self.skeleton_rect.y += move_dir_y * self.skeleton_speed
 			self.remember_hero_x = obj_hero.hero_rect.x
 			self.remember_hero_y = obj_hero.hero_rect.x
-		elif distance == 0:
+
+		elif distance[0] == 0:
 			move_dir_x = 0
 			move_dir_y = 1
 		else:
 			if self.remember_hero_x != 'idk' and self.remember_hero_y != 'idk':
+				self.skeleton_curr_img = self.skeleton_stay_front
+				self.chase_cooldown = 100
 				distance_x = self.remember_hero_x - self.skeleton_rect.x
 				if distance_x > 0:
 					self.skeleton_direction = 'right'
@@ -337,6 +359,14 @@ class Skeleton:
 				else:
 					self.skeleton_direction = 'left'
 					self.remember_hero_y = self.remember_hero_x = 'idk'
+
+
+	def calculate_distance_to_hero(self, obj_hero):
+		'''function whihc calculating distance to hero from skeleton'''
+		distance_x = obj_hero.hero_rect.x - self.skeleton_rect.x
+		distance_y = obj_hero.hero_rect.y - self.skeleton_rect.y
+		distance = math.hypot(distance_x, distance_y)
+		return [distance, distance_x, distance_y]
 
 
 
